@@ -3,7 +3,7 @@
 
 #define MONITOR_SIGNALS
 #define MONITOR_RATE
-// #define DUMMY_HEARBEAT
+#define DUMMY_HEARBEAT
 
 
 // struct encargada de medir la frecuencia en la señal
@@ -15,19 +15,27 @@ struct PulseAnalyzer {
   float maxThreshold = 4.;
   bool prevSlopePositive = false;
   unsigned long lastPositiveCross = 0;
+  unsigned long lastMeasurement = 0;
   float measuredFrequencyHertz = 0.;
-  void thresholdCrossedUp(unsigned long now) {
+  void thresholdCrossedUp(unsigned long now, unsigned long interval) {
     // funcion para llamar cuando el pulso cruza el umbral en dirección positiva
     // se mide el intervalo de tiempo respecto de la última vez, y así obtenemos
     // la frecuencia
     unsigned long deltaTimeMillis = now - lastPositiveCross;
     float hz = 1000. / (float)deltaTimeMillis;
-    // promediar
-    measuredFrequencyHertz = hz * 0.3 + measuredFrequencyHertz * 0.7;
+    measuredFrequencyHertz = hz;
     lastPositiveCross = now;
+  }
+  void thresholdNotCrossed(unsigned long now, unsigned long interval) {
+    unsigned long deltaTimeMillis = now - lastPositiveCross;
+    // si no se ha detectado pulso en mas de 1.2s, setear la frecuencia en cero
+    if (deltaTimeMillis > 1200) {
+      measuredFrequencyHertz = 0;
+    }
   }
   void inSample(float sampleValue, unsigned long now) {
     bool currentSlopePositive = sampleValue > movingThreshold;
+    unsigned long interval = now - lastMeasurement;
     // crea una línea de comparación para reconocer un pulso, aunque este varíe
     if (currentSlopePositive) {
       movingThreshold = movingThreshold * 0.7 + sampleValue * 0.3;
@@ -35,15 +43,19 @@ struct PulseAnalyzer {
         movingThreshold = maxThreshold;
       };
       if (!prevSlopePositive) {
-        thresholdCrossedUp(now);
+        thresholdCrossedUp(now, interval);
+      } else {
+        thresholdNotCrossed(now, interval);
       }
     } else {
       movingThreshold -= 2. / samplingRate;
       if (movingThreshold < minThreshold) {
         movingThreshold = minThreshold;
       }
+      thresholdNotCrossed(now, interval);
     }
     prevSlopePositive = currentSlopePositive;
+    lastMeasurement = now;
   }
 } PulseAnalyzer;
 
@@ -96,6 +108,9 @@ void loop() {
   float r = PI * float(now) / 1000.;
   float s = sin(r);
   heartSignal = 2. * s * s;
+  if (now > 10000) {
+    heartSignal = 0;
+  }
 #endif
 
 
