@@ -18,14 +18,14 @@
 #define WIFI_PASSWORD "arcoiris"
 
 /* 2. Define the API Key */
-#define API_KEY "AIzaSyBOEaOb1zR_5KXc0clo9riySkbMlXV841s"
+#define API_KEY " -- API KEY --"
 
 /* 3. Define the RTDB URL */
-#define DATABASE_URL "https://telecardiogram-default-rtdb.firebaseio.com/"
+#define DATABASE_URL " -- URL --"
 
 /* 4. Define the user Email and password that alreadey registerd or added in your project */
-#define USER_EMAIL "joaquin.aldunate@gmail.com"
-#define USER_PASSWORD "test-password"
+#define USER_EMAIL "-- e mail --"
+#define USER_PASSWORD "-- password --"
 
 // Define Firebase Data object
 FirebaseData fbdo;
