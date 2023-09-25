@@ -92,7 +92,7 @@ struct SignalFilter {
 void analisis_setup() {
   pinMode(PIN_PULSE_SENSOR, INPUT);
 #if defined(MONITOR_SIGNALS) || defined(MONITOR_RATE)
-  Serial.begin(9600);
+  Serial.begin(115200);
 #endif
 }
 
@@ -135,4 +135,8 @@ void analisis_loop() {
 #if defined(MONITOR_SIGNALS) || defined(MONITOR_RATE)
   Serial.println();
 #endif
+}
+
+float analisis_getFrequency() {
+  return PulseAnalyzer.measuredFrequencyHertz;
 }

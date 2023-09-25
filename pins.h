@@ -1,0 +1,1 @@
+#define PIN_PULSE_SENSOR A0
