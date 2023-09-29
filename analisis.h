@@ -1,9 +1,15 @@
 #define samplingRate 100
 
 // qué cosas mandar a Serial
-// #define MONITOR_SIGNALS
-// #define MONITOR_RATE
+#define MONITOR_SIGNALS
+#define MONITOR_RATE
+// de si usar una señal falsa para probar.
 // #define DUMMY_HEARBEAT
+
+namespace Analysis {
+
+unsigned long nextMeasurement = 0;
+int interval = 1000 / samplingRate;
 
 
 // struct encargada de medir la frecuencia en la señal
@@ -66,12 +72,8 @@ struct SignalFilter {
   float lowpassed = 0;
   float _lowpassed2 = 0;
   float outputValue = 0;
-  float lowpassRatio = 0.1;
-  float highPassRatio = 0.1;
-
-  int interval = 1000 / samplingRate;
-  unsigned long nextMeasurement = 0;
-
+  float lowpassRatio = 10 / (float)samplingRate;
+  float highPassRatio = 10 / (float)samplingRate;
   void measure() {
     originalValue = analogRead(PIN_PULSE_SENSOR);
     lowpassed = lowpassRatio * originalValue + (1 - lowpassRatio) * lowpassed;
@@ -79,36 +81,31 @@ struct SignalFilter {
     outputValue = lowpassed - _lowpassed2;
   }
 
-  // llamar ésta en cada loop
-  void loop() {
-    unsigned long now = millis();
-    if (now > nextMeasurement) {
-      nextMeasurement = now + interval;
-      measure();
-    }
-  }
 } SignalFilter;
 
-void analisis_setup() {
+void setup() {
   pinMode(PIN_PULSE_SENSOR, INPUT);
 #if defined(MONITOR_SIGNALS) || defined(MONITOR_RATE)
   Serial.begin(115200);
 #endif
 }
 
-void analisis_loop() {
+void loop() {
+
 
   unsigned long now = millis();
+  if (now > nextMeasurement) {
+    nextMeasurement = now + interval;
+    SignalFilter.measure();
 
-  SignalFilter.loop();
 
 
-  float heartSignal = SignalFilter.outputValue;
+    float heartSignal = SignalFilter.outputValue;
 #if defined(DUMMY_HEARBEAT)
-  float r = PI * float(now) / 1000.;
-  float s = sin(r);
-  heartSignal = 2. * s * s;
-  /*
+    float r = PI * float(now) / 1000.;
+    float s = sin(r);
+    heartSignal = 2. * s * s;
+    /*
   if (now > 10000) {
     heartSignal = 0;
   }
@@ -116,27 +113,33 @@ void analisis_loop() {
 #endif
 
 
-  PulseAnalyzer.inSample(heartSignal, now);
+    PulseAnalyzer.inSample(heartSignal, now);
+
 
 #if defined(MONITOR_SIGNALS)
-  Serial.print(-1);
-  Serial.print(',');
-  Serial.print(heartSignal, 4);
-  Serial.print(',');
-  Serial.print(PulseAnalyzer.movingThreshold, 4);
-  Serial.print(',');
-  Serial.print(3);
-  Serial.print(',');
+    Serial.print(-1);
+    Serial.print(',');
+    Serial.print(heartSignal);
+    //Serial.print(',');
+    //Serial.print(PulseAnalyzer.movingThreshold);
+    Serial.print(',');
+    Serial.print(3);
+    Serial.print(',');
 #endif
 #if defined(MONITOR_RATE)
-  Serial.print(PulseAnalyzer.measuredFrequencyHertz, 4);
-  Serial.print(',');
+    //Serial.print(PulseAnalyzer.measuredFrequencyHertz);
+    //Serial.print(',');
 #endif
 #if defined(MONITOR_SIGNALS) || defined(MONITOR_RATE)
-  Serial.println();
+    Serial.println();
 #endif
+  }
 }
 
-float analisis_getFrequency() {
+float getFrequency() {
   return PulseAnalyzer.measuredFrequencyHertz;
+}
+
+
+
 }

@@ -1,6 +1,6 @@
 
-#define USE_FIREBASE
-#define LOG_FIREBASE
+// #define USE_FIREBASE
+// #define LOG_FIREBASE
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -38,7 +38,7 @@ unsigned long nextSendDataTime = 10000;
 
 
 void setup() {
-  analisis_setup();
+  Analysis::setup();
 
 #if defined(LOG_FIREBASE) && defined(USE_FIREBASE)
   Serial.begin(115200);
@@ -84,11 +84,11 @@ void setup() {
 
 void loop() {
   unsigned long now = millis();
-  analisis_loop();
+  Analysis::loop();
 
 #if defined(USE_FIREBASE)
   if (Firebase.ready() && (now > nextSendDataTime)) {
-    float f = analisis_getFrequency();
+    float f = Analysis::getFrequency();
     nextSendDataTime = now + 5000;
 #if defined(LOG_FIREBASE)
     Serial.print("float value is");
