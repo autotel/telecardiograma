@@ -38,10 +38,10 @@ unsigned long nextSendDataTime = 10000;
 
 
 void setup() {
-  Analysis::setup();
+  Analisis::setup();
 
 #if defined(LOG_FIREBASE) && defined(USE_FIREBASE)
-  Serial.begin(115200);
+  Serial.begin(9600);
 #endif
 
 #if defined(USE_FIREBASE)
@@ -84,11 +84,11 @@ void setup() {
 
 void loop() {
   unsigned long now = millis();
-  Analysis::loop();
+  Analisis::loop();
 
 #if defined(USE_FIREBASE)
   if (Firebase.ready() && (now > nextSendDataTime)) {
-    float f = Analysis::getFrequency();
+    float f = Analisis::bpm;
     nextSendDataTime = now + 5000;
 #if defined(LOG_FIREBASE)
     Serial.print("float value is");
