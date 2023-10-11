@@ -1,6 +1,6 @@
 
-// #define USE_FIREBASE
-// #define LOG_FIREBASE
+#define USE_FIREBASE
+#define LOG_FIREBASE
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -14,8 +14,8 @@
 #include "analisis.h"
 
 /* 1. Define the WiFi credentials */
-#define WIFI_SSID "TRUCHA_BASICO"
-#define WIFI_PASSWORD "arcoiris"
+#define WIFI_SSID "-- wifi ssid --"
+#define WIFI_PASSWORD "-- wifi password --"
 
 /* 2. Define the API Key */
 #define API_KEY " -- API KEY --"
