@@ -12,6 +12,7 @@
 
 #include "pins.h"
 #include "analisis.h"
+#include "temperatura.h"
 
 /* 1. Define the WiFi credentials */
 #define WIFI_SSID "-- wifi ssid --"
@@ -35,11 +36,9 @@ FirebaseConfig config;
 
 unsigned long nextSendDataTime = 10000;
 
-
-
 void setup() {
   Analysis::setup();
-
+  Temperatura::setup();
 #if defined(LOG_FIREBASE) && defined(USE_FIREBASE)
   Serial.begin(115200);
 #endif
@@ -85,15 +84,21 @@ void setup() {
 void loop() {
   unsigned long now = millis();
   Analysis::loop();
+  Temperatura::loop();
 
 #if defined(USE_FIREBASE)
   if (Firebase.ready() && (now > nextSendDataTime)) {
-    float f = Analysis::getFrequency();
     nextSendDataTime = now + 5000;
+
+    float freq = Analysis::getFrequency();
+    bool success1 = Firebase.setFloat(fbdo, F("/hertz"), freq);
+    bool success2 = Firebase.setFloat(fbdo, F("/temperatura"), Temperatura::temperatureC);
+
 #if defined(LOG_FIREBASE)
     Serial.print("float value is");
-    Serial.print(f);
-    Serial.printf(" sending... %s\n", Firebase.setFloat(fbdo, F("/hertz"), f) ? "ok" : fbdo.errorReason().c_str());
+    Serial.print(freq);
+    Serial.printf(" sending temp ... %s\n",
+                  success2 ? "ok" : fbdo.errorReason().c_str());
     Serial.println();
 #endif
   }
